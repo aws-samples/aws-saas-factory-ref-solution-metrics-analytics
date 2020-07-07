@@ -1,0 +1,602 @@
+## Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+## SPDX-License-Identifier: MIT-0
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Template deploys a Metrics & Analytics Solution that Integrates Amazon Kinesis Firehose, S3 and Amazon Redshift in an existing VPC.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network configuration
+        Parameters:
+          - VPC
+      - Label:
+          default: Subnet configuration
+        Parameters:
+          - PublicSubnetA
+          - PublicSubnetB                 
+      - Label:
+          default: Encrypt data configuration
+        Parameters:
+          - EncryptData
+      - Label:
+          default: Amazon Redshift cluster configuration
+        Parameters:
+          - DatabaseName
+          - ClusterType
+          - NumberOfNodes
+          - NodeType
+          - RedshiftPortNumber
+      - Label:
+          default: Amazon Redshift configuration for Amazon Kinesis Data Firehose
+        Parameters:
+          - MasterUser
+          - MasterUserPassword
+          - RedshiftTableName
+          - RedshiftBufferInterval
+          - RedshiftBufferSize         
+      
+    ParameterLabels:
+      VPC:
+        default: Existing VPC ID
+      PublicSubnetA:
+        default: Existing public subnet ID in AZ-1
+      PublicSubnetB:
+        default: Existing public subnet ID in AZ-2      
+      DatabaseName:
+        default: Database name
+      ClusterType:
+        default: Cluster type
+      NumberOfNodes:
+        default: Number of nodes
+      NodeType: 
+        default: Node type
+      EncryptData:
+        default: Encrypt data at rest
+      MasterUser:
+        default: Master user name
+      MasterUserPassword:
+        default: Master user password
+      RedshiftTableName:
+        default: Table name
+      RedshiftBufferInterval:
+        default: Buffer interval
+      RedshiftBufferSize:
+        default: Buffer size
+      RedshiftPortNumber:
+        default: Redshift port number      
+      
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Choose an existing VPC
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet::Id
+    Description: The public subnet in Availability Zone 1
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet::Id
+    Description: The public subnet in Availability Zone 2  
+  EncryptData:
+    Description: Set to yes to encrypt the data as it leaves your Amazon Kinesis Data Firehose delivery stream.
+    Type: String
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Default: 'no'
+  DatabaseName:
+    Description: The name of the first database to be created when the Amazon Redshift cluster is created.
+    Type: String
+    Default: 'metricsdb'
+    AllowedPattern: "([a-z]|[0-9])+"
+  ClusterType:
+    Description: The type of Amazon Redshift cluster.
+    Type: String
+    Default: multi-node
+    AllowedValues:
+    - single-node
+    - multi-node
+  NumberOfNodes:
+    Description: The number of compute nodes in the Amazon Redshift cluster. For multi-node clusters, the NumberOfNodes parameter must be greater than 1.
+    Type: Number
+    Default: '2'
+  NodeType:
+    Description: The type of Amazon Redshift node to be provisioned.
+    Type: String
+    Default: dc2.large
+    AllowedValues:
+    - dc2.large
+    - dc2.8xlarge
+    - ra3.4xlarge
+    - ra3.16xlarge
+  MasterUserPassword:
+    Description: The master user password for the Amazon Redshift cluster. Must contain one number and no special characters.
+    NoEcho: 'true'
+    Type: String
+  MasterUser:
+    Description: The name of the master user of the Amazon Redshift cluster.
+    Type: String
+    Default: metricsadmin
+  RedshiftBufferInterval:
+    Description: The number of seconds to buffer data before delivering to Amazon Redshift (60 to 900).
+    Type: Number
+    Default: 300
+    MinValue: 60
+    MaxValue: 900
+  RedshiftBufferSize:
+    Description: MB of data to buffer before delivering to Amazon Redshift (1 to 128).
+    Type: Number
+    Default: 5
+    MinValue: 1
+    MaxValue: 128
+  RedshiftTableName:
+    Description: The name of the table in the Amazon Redshift cluster.
+    Type: String
+    Default: Metrics
+  RedshiftPortNumber:
+    Description: The Amazon Redshift publicly accessible port number.
+    Type: String
+    Default: '8200'    
+Mappings:
+  RegionMap: 
+    us-east-1: 
+      RedshiftInboundTraffic: 52.70.63.192/27
+    us-east-2:
+      RedshiftInboundTraffic: 13.58.135.96/27
+    us-west-2:
+      RedshiftInboundTraffic: 52.89.255.224/27
+    us-west-1:
+      RedshiftInboundTraffic: 13.57.135.192/27
+    eu-central-1:
+      RedshiftInboundTraffic: 35.158.127.160/27
+    ca-central-1:
+      RedshiftInboundTraffic: 35.183.92.128/27
+    eu-west-1:
+      RedshiftInboundTraffic: 52.19.239.192/27
+    eu-west-2:
+      RedshiftInboundTraffic: 18.130.1.96/27
+    eu-west-3:
+      RedshiftInboundTraffic: 35.180.1.96/27
+    ap-southeast-1:
+      RedshiftInboundTraffic: 13.228.64.192/27
+    ap-southeast-2:
+      RedshiftInboundTraffic: 13.210.67.224/27
+    ap-northeast-1:
+      RedshiftInboundTraffic: 13.113.196.224/27
+    ap-northeast-2:
+      RedshiftInboundTraffic: 13.209.1.64/27
+    ap-south-1:
+      RedshiftInboundTraffic: 13.232.67.32/27
+    sa-east-1:
+      RedshiftInboundTraffic: 18.228.1.128/27
+  AWSQuickSightIPMap:
+    ap-northeast-1: 
+      QuickSightIP: 13.113.244.32/27
+    ap-southeast-1: 
+      QuickSightIP: 13.229.254.0/27
+    ap-southeast-2: 
+      QuickSightIP: 54.153.249.96/27
+    eu-central-1: 
+      QuickSightIP: 35.158.127.192/27
+    eu-west-1: 
+      QuickSightIP: 52.210.255.224/27
+    eu-west-2: 
+      QuickSightIP: 35.177.218.0/27
+    us-east-1: 
+      QuickSightIP: 52.23.63.224/27
+    us-east-2: 
+      QuickSightIP: 52.15.247.160/27
+    us-west-2: 
+      QuickSightIP: 54.70.204.128/27
+    us-west-1:
+      QuickSightIP: none
+    ca-central-1:
+      QuickSightIP: none
+    eu-west-3:
+      QuickSightIP: none
+    eu-north-1:
+      QuickSightIP: none
+    ap-east-1:
+      QuickSightIP: none
+    ap-northeast-2:
+      QuickSightIP: none
+    ap-northeast-3:
+      QuickSightIP: none
+    ap-south-1:
+      QuickSightIP: none
+    me-south-1:
+      QuickSightIP: none
+    sa-east-1:
+      QuickSightIP: none
+
+Conditions:
+  IsMultiNodeCluster:
+    Fn::Equals:
+    - Ref: ClusterType
+    - multi-node
+  EncryptData: !Equals
+    - !Ref 'EncryptData'
+    - 'yes'
+  NoEncryption: !Equals
+    - !Ref 'EncryptData'
+    - 'no'  
+  isQuickSightRegionIP:
+    !Not [!Equals [!FindInMap [ AWSQuickSightIPMap, !Ref "AWS::Region", QuickSightIP ], "none"]]
+
+Resources:
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    Condition: EncryptData
+    Properties:
+      Description: KMS key generated to encrypt Kinesis data.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Id: KMS key policy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - :root
+            Action: kms:*
+            Resource: '*'
+          - Sid: Allow access for Key Administrators
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - :root
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: '*'
+          - Sid: Allow use of the key
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - :root
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: '*'
+          - Sid: Allow attachment of persistent resources
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - :root
+            Action:
+              - kms:CreateGrant
+              - kms:ListGrants
+              - kms:RevokeGrant
+            Resource: '*'
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: true
+  KMSAlias:
+    Type: AWS::KMS::Alias
+    Condition: EncryptData
+    Properties:
+      AliasName: !Join
+        - ''
+        - - alias/key-
+          - !Ref 'AWS::StackName'
+      TargetKeyId: !GetAtt 'EncryptionKey.Arn'
+  MetricsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      LifecycleConfiguration:
+        Rules:
+        - Id: DeleteRedshiftDelivery
+          Prefix: 'RedshiftDelivery'
+          Status: 'Enabled'
+          ExpirationInDays: 7
+  RedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    DependsOn: RedshiftClusterRole
+    Properties:
+      ClusterType: !Ref ClusterType
+      NumberOfNodes:
+        Fn::If:
+        - IsMultiNodeCluster
+        - Ref: NumberOfNodes
+        - Ref: AWS::NoValue
+      NodeType:
+        Ref: NodeType
+      DBName:
+        Ref: DatabaseName
+      IamRoles:
+        - !GetAtt RedshiftClusterRole.Arn
+      MasterUsername:
+        Ref: MasterUser
+      MasterUserPassword:
+        Ref: MasterUserPassword
+      ClusterParameterGroupName:
+        Ref: RedshiftClusterParameterGroup
+      VpcSecurityGroupIds:
+      - Ref: RSDefaultSG
+      ClusterSubnetGroupName:
+        Ref: RedshiftClusterSubnetGroup
+      PubliclyAccessible: true
+      Port:
+        Ref: RedshiftPortNumber
+  RedshiftClusterParameterGroup:
+    Type: AWS::Redshift::ClusterParameterGroup
+    Properties:
+      Description: Cluster parameter group
+      ParameterGroupFamily: redshift-1.0
+      Parameters:
+      - ParameterName: enable_user_activity_logging
+        ParameterValue: 'true'
+  RedshiftClusterSubnetGroup:
+    Type: AWS::Redshift::ClusterSubnetGroup
+    Properties:
+      Description: Cluster subnet group
+      SubnetIds:
+      - Ref: PublicSubnetA
+      - Ref: PublicSubnetB      
+  RSDefaultSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RSSecurity group
+      SecurityGroupIngress:
+      - CidrIp: !FindInMap
+               - RegionMap
+               - !Ref 'AWS::Region'
+               - RedshiftInboundTraffic
+        FromPort:
+          Ref: RedshiftPortNumber
+        ToPort:
+          Ref: RedshiftPortNumber
+        IpProtocol: tcp
+        Description: Kinesis Data Firehose CIDR block 
+      VpcId: !Ref VPC
+  QSingressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: isQuickSightRegionIP
+    Properties: 
+      CidrIp: !FindInMap
+              - AWSQuickSightIPMap
+              - !Ref 'AWS::Region'
+              - QuickSightIP
+      Description: Amazon QuickSight access
+      FromPort: 
+        Ref: RedshiftPortNumber
+      ToPort: 
+        Ref: RedshiftPortNumber
+      IpProtocol: tcp
+      GroupId: !GetAtt RSDefaultSG.GroupId
+  RedshiftClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - redshift.amazonaws.com
+            Action:
+              - sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref 'AWS::AccountId'
+      Policies:
+        - PolicyName: !Join
+            - ''
+            - - Redshift-Delivery-
+              - !Ref 'AWS::StackName'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ''
+                Effect: Allow
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:GetBucketAcl
+                  - s3:ListAllMyBuckets
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref 'MetricsBucket'
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref 'MetricsBucket'
+                      - /*              
+  FirehoseDeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - firehose.amazonaws.com                
+            Action:
+              - sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref 'AWS::AccountId'
+      Policies:
+        - PolicyName: !Join
+            - ''
+            - - Redshift-Delivery-
+              - !Ref 'AWS::StackName'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ''
+                Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                  - s3:GetBucketAcl
+                  - s3:ListAllMyBuckets
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref 'MetricsBucket'
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref 'MetricsBucket'
+                      - /*
+              - Sid: ''                      
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !If
+                    - NoEncryption
+                    - !Join
+                      - ''
+                      - - 'arn:aws:kms:'
+                        - !Ref 'AWS::Region'
+                        - ':'
+                        - !Ref 'AWS::AccountId'
+                        - :key/placeholder-kms-id
+                    - !GetAtt 'EncryptionKey.Arn'
+                Condition:
+                  StringEquals:
+                    kms:ViaService: !Join
+                      - ''
+                      - - s3.
+                        - !Ref 'AWS::Region'
+                        - .amazonaws.com
+                  StringLike:
+                    kms:EncryptionContext:aws:s3:arn: !Join
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - !Ref 'MetricsBucket'
+                        - /RedshiftDelivery/*
+              - Sid: ''
+                Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource:
+                  - '*'
+              - Sid: ''
+                Effect: Allow
+                Action:
+                  - kinesis:Get*
+                  - kinesis:Describe*
+                  - kinesis:ListShards
+                  - lambda:InvokeFunction
+                  - lambda:GetFunctionConfiguration
+                  - glue:Get*                  
+                Resource:
+                  - '*'
+  MetricsStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn: FirehoseDeliveryRole
+    Properties:
+      RedshiftDestinationConfiguration:
+        ClusterJDBCURL: !Sub "jdbc:redshift://${RedshiftCluster.Endpoint.Address}:${RedshiftCluster.Endpoint.Port}/${DatabaseName}"
+        CopyCommand:
+          CopyOptions: !Join
+                        - ''
+                        - - "gzip compupdate off STATUPDATE ON TIMEFORMAT 'epochsecs' "
+                          - "json 's3://" 
+                          - !Ref 'MetricsBucket'
+                          - "/metrics_redshift_jsonpath.json'"
+          DataTableName: !Ref 'RedshiftTableName'
+        Username: !Ref 'MasterUser'
+        Password: !Ref 'MasterUserPassword'
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref RSCloudwatchLogsGroup
+          LogStreamName: !Ref RSLogStream
+        RoleARN: !GetAtt 'FirehoseDeliveryRole.Arn'
+        S3Configuration:
+          BucketARN: !Join
+            - ''
+            - - 'arn:aws:s3:::'
+              - !Ref 'MetricsBucket'          
+          RoleARN: !GetAtt 'FirehoseDeliveryRole.Arn'
+          BufferingHints:
+            IntervalInSeconds: !Ref 'RedshiftBufferInterval'
+            SizeInMBs: !Ref 'RedshiftBufferSize'
+          CompressionFormat: GZIP
+          EncryptionConfiguration:
+            KMSEncryptionConfig: !If
+              - NoEncryption
+              - !Ref 'AWS::NoValue'
+              - AWSKMSKeyARN: !GetAtt 'EncryptionKey.Arn'
+            NoEncryptionConfig: !If
+              - NoEncryption
+              - NoEncryption
+              - !Ref 'AWS::NoValue'
+          Prefix: RedshiftDelivery/
+  RSCloudwatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 365
+  RSLogStream: 
+    Type: AWS::Logs::LogStream
+    Properties: 
+      LogGroupName: !Ref RSCloudwatchLogsGroup
+      LogStreamName: redshift
+    
+Outputs:
+  VPCID:
+    Value: !Ref VPC
+  PublicSubnetA:
+    Value: !Ref PublicSubnetA
+  PublicSubnetB:
+    Value: !Ref PublicSubnetB  
+  S3Bucket:
+    Value: !Ref MetricsBucket
+  RedshiftCluster:
+    Value: !Ref RedshiftCluster
+  RedshiftDeliveryStream:
+    Value: !Ref MetricsStream
+  RedshiftEndpointAddress:
+    Value: !Sub "${RedshiftCluster.Endpoint.Address}"
+  RedshiftEndpointPort:
+    Value: !Sub "${RedshiftCluster.Endpoint.Port}"
+  RedshiftDatabaseName:
+    Value: !Ref DatabaseName
+  RedshiftJDBCURL:
+    Value: !Sub "jdbc:redshift://${RedshiftCluster.Endpoint.Address}:${RedshiftCluster.Endpoint.Port}/${DatabaseName}"
+  
