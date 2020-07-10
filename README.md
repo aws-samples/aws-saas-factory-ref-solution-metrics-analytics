@@ -56,7 +56,7 @@ Make sure to allow QuickSight to access Redshift, while signing up. Alternativel
 * Select "Amazon Redshift" from the list.
 * Click Update.
 
-<p align="center"><kbd><img width=600 height=600 src="./images/QuickSight.png" alt="Setup QuickSight"/></kbd></p>
+<p align="center"><kbd><img width=600 height=600 src="./images/Quicksight.png" alt="Setup QuickSight"/></kbd></p>
 
 ### 5. Deploy S3 artifacts and create Redshift connection inside QuickSight
 Redshift uses a "JSONPaths" file to map JSON columns to the Table. Since we are sending JSON data to Firehose, we need this file, so that Firehose can use it to map JSON columns to "metrics" table. Finally, we also need to setup a Data Source and Data Set inside QuickSight, which can be used to connect to the Redshift cluster. We will use <b>"4_setup-s3-QuickSight.py"</b> file, inside the <b>"deploy"</b> folder, to perform these two actions.
