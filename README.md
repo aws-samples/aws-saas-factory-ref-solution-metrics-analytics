@@ -202,7 +202,7 @@ Above are few examples and the way metrics will be visualized depends on the use
 
 Here are some of the screenshots demonstrating these use cases.
 
-<p align="center"><kbd><img width=1000 height=450 src="./images/SystemUsage_1.png" "/></kbd></p>
+<p align="center"><kbd><img width=1000 height=400 src="./images/SystemUsage_1.png" "/></kbd></p>
 
 <p align="center"><kbd><img width=1000 height=450 src="./images/SystemUsage_2.png" "/></kbd></p>
 
