@@ -119,7 +119,7 @@ Let's now use our sample metrics generator to generate some sample metrics.
 cd metrics-generator
 python3 application-metrics-generator.py
 ```
-<p align="center"><kbd><img width=900 height=130 src="./images/SetupQuickSight.png" alt="Setup QuickSight"/></kbd></p>
+<p align="center"><kbd><img width=900 height=130 src="./images/SetupQuicksight.png" alt="Setup QuickSight"/></kbd></p>
 
 You will be asked to provide 8 inputs, each with appropriate defaults.
 
