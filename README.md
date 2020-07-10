@@ -64,7 +64,7 @@ Redshift uses a "JSONPaths" file to map JSON columns to the Table. Since we are 
 ```
 python3 4_setup-s3-QuickSight.py 
 ```
-<p align="center"><kbd><img width=900 height=130 src="./images/SetupQuickSight.png" alt="Setup QuickSight"/></kbd></p>
+<p align="center"><kbd><img width=900 height=130 src="./images/SetupQuicksight.png" alt="Setup QuickSight"/></kbd></p>
 
 You will be asked to provide 8 inputs, each with appropriate defaults.
 
@@ -83,25 +83,26 @@ This completes the deployment of the Architecture and all the associated compone
 Before we generate some sample metrics, it is important to understand the structure of the multi-tenant JSON. This JSON structure directly correlates to the table that we created above inside Redshift. Below is an example JSON .
 ```json
 {
-	"type": "Application",  						
-	"workload": "PhotoApplication", 				
-	"context": "PhotoUploadService", 			    
-	"tenant": {							            
-			"id": "tenant-id-1", 
-			"name": "tenant-name-a", 
-			"tier": "standard”
-		}, 
-	"metric": {					 		            
-			"name": "DataTransfer", 
-			"unit": "MB", 
-			"value": 810
-		}, 
-	"timestamp": "1593734382", 			
-	"metadata": {                                   
+        "type": "Application",  						
+        "workload": "PhotoApplication", 				
+        "context": "PhotoUploadService", 			    
+        "tenant": {							            
+                        "id": "tenant-id-1", 
+                        "name": "tenant-name-a", 
+                        "tier": "standard"
+                }, 
+        "metric": {					 		            
+                        "name": "DataTransfer", 
+                        "unit": "MB", 
+                        "value": 810
+                }, 
+        "timestamp": "1593734382", 			
+        "metadata": {                                   
                 "user": "user-4", 
-                "resource": "load-balancer”}
+                "resource": "load-balancer”
+                }
                 		
-        }
+}
 ```
 Here is the description for each element of this JSON.
 - <b>"type":</b> This is defaulted to "Application" in our case. But, in case you want to extend the usage of this architecture to ingest system level metrics or business KPIs, then you can choose to add "System" or "KPI" as a type, as well.
@@ -156,26 +157,26 @@ Assuming your SaaS Application is written in Java, use the following snippet to 
 
 Sample Java code to send the metric:
 ```
- 	MetricEventLogger logger = MetricEventLogger.getLoggerFor("STREAM_NAME", Region.US_EAST_1);
-        MetricEvent event = new MetricEventBuilder()
-                .withType(MetricEvent.Type.Application)
-                .withWorkload("AuthApp")
-                .withContext("Login")
-                .withMetric(new MetricBuilder()
-                        .withName("ExecutionTime")
-                        .withUnit("msec")
-                        .withValue(1000L)
-                        .build()
-                )
-                .withTenant(new TenantBuilder()
-                        .withId("123")
-                        .withName("ABC")
-                        .withTier("Free")
-                        .build())
-                .addMetaData("user", "111")
-                .addMetaData("resource", "s3")
-                .build();
-        logger.log(event);
+MetricEventLogger logger = MetricEventLogger.getLoggerFor("STREAM_NAME", Region.US_EAST_1);
+MetricEvent event = new MetricEventBuilder()
+        .withType(MetricEvent.Type.Application)
+        .withWorkload("AuthApp")
+        .withContext("Login")
+        .withMetric(new MetricBuilder()
+                .withName("ExecutionTime")
+                .withUnit("msec")
+                .withValue(1000L)
+                .build()
+        )
+        .withTenant(new TenantBuilder()
+                .withId("123")
+                .withName("ABC")
+                .withTier("Free")
+                .build())
+        .addMetaData("user", "111")
+        .addMetaData("resource", "s3")
+        .build();
+logger.log(event);
 ```
 
 You can refer this SDK to come up with sample implementations in other programming languages, depending upon your use case.
@@ -215,7 +216,7 @@ This tab is used for visualizing your top used features by tenants and tenant ti
 #### Metrics Per User
 In some cases, you might want to know which user is consuming most within a tenant. Below screenshot uses the "user" attribute inside "meta_data" attribute of the JSON. Here we have created a calculated field inside QuickSight Dataset, something like this: 
 
-<p align="center"><kbd><img width=700 height=300 src="./images/QuickSightCalculatedField.png" "/></kbd></p>
+<p align="center"><kbd><img width=700 height=300 src="./images/QuicksightCalculatedField.png" "/></kbd></p>
 
 Below is the Metrics per user graph.
 <p align="center"><kbd><img width=1000 height=550 src="./images/MetricsPerUser.png" "/></kbd></p>
