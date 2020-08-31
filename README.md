@@ -151,7 +151,7 @@ Assuming your SaaS Application is written in Java, use the following snippet to 
 <dependency>
             <groupId>com.amazonaws.saas</groupId>
             <artifactId>metrics-java-sdk</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
 </dependency>
 ```
 
