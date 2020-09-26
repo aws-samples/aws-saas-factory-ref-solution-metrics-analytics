@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metrics.builder;
+
+import com.amazonaws.saas.metrics.domain.Tenant;
 
 public class TenantBuilder {
     private Tenant tenant = new Tenant();

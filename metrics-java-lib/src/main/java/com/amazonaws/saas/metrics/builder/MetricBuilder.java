@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metrics.builder;
+
+import com.amazonaws.saas.metrics.domain.Metric;
 
 public class MetricBuilder {
     private Metric metric = new Metric();
@@ -10,7 +12,7 @@ public class MetricBuilder {
         return this;
     }
 
-    public MetricBuilder withValue(Long value) {
+    public MetricBuilder withValue(Integer value) {
         this.metric.setValue(value);
         return this;
     }

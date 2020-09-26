@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT-0
 package com.amazonaws.saas.metrics;
 
+import com.amazonaws.saas.metrics.builder.MetricBuilder;
+import com.amazonaws.saas.metrics.builder.MetricEventBuilder;
+import com.amazonaws.saas.metrics.builder.TenantBuilder;
+import com.amazonaws.saas.metrics.domain.MetricEvent;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,7 +24,7 @@ public class MetricEventLoggerIntegrationTest {
                 .withMetric(new MetricBuilder()
                         .withName("ExecutionTime")
                         .withUnit("msec")
-                        .withValue(1000L)
+                        .withValue(1000)
                         .build()
                 )
                 .withTenant(new TenantBuilder()
@@ -35,9 +39,9 @@ public class MetricEventLoggerIntegrationTest {
 
     @Ignore
     @Test
-    public void logSingleEventShouldSendToKinesisRighAway() {
+    public void logSingleEventShouldSendToKinesisRightAway() {
         MetricEventLogger logger = MetricEventLogger.getLoggerFor("Metrics", Region.US_EAST_1);
-        logger.log(event);
+        logger.logEvent(event);
     }
 
     @Ignore
@@ -46,7 +50,7 @@ public class MetricEventLoggerIntegrationTest {
         int buffer = 5;
         MetricEventLogger logger = MetricEventLogger.getBatchLoggerFor("Metrics", Region.US_EAST_1, buffer, 60);
         for (int i = 0 ; i <= (buffer + 1) ; i++)
-            logger.log(event);
+            logger.logEvent(event);
     }
 
     @Ignore
@@ -55,11 +59,12 @@ public class MetricEventLoggerIntegrationTest {
         int buffer = 25;
         MetricEventLogger logger = MetricEventLogger.getBatchLoggerFor("Metrics", Region.US_EAST_1, buffer, 2);
         for (int i = 0 ; i <= (buffer + 1) ; i++) {
-            logger.log(event);
+            logger.logEvent(event);
             Thread.sleep(1000);
         }
 
     }
+
 
 
 

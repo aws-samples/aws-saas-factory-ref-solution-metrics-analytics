@@ -1,11 +1,15 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metrics.builder;
 
-import com.amazonaws.saas.metrics.MetricEvent.Type;
-import java.util.Map;
+import com.amazonaws.saas.metrics.domain.Metric;
+import com.amazonaws.saas.metrics.domain.MetricEvent;
+import com.amazonaws.saas.metrics.domain.MetricEvent.Type;
+import com.amazonaws.saas.metrics.domain.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class MetricEventBuilder {
     private static final Logger logger = LoggerFactory.getLogger(MetricEventBuilder.class);

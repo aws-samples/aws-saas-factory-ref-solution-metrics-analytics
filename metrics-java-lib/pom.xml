@@ -6,15 +6,15 @@
 
     <groupId>com.amazonaws.saas</groupId>
     <artifactId>metrics-java-lib</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <licenses>
-		<license>
-			<name>MIT No Attribution License (MIT-0)</name>
-			<url>https://spdx.org/licenses/MIT-0.html</url>
-		</license>
-	</licenses>
+        <license>
+            <name>MIT No Attribution License (MIT-0)</name>
+            <url>https://spdx.org/licenses/MIT-0.html</url>
+        </license>
+    </licenses>
     <name>SaaSFactoryMetricsAnalytics</name>
-	<description>Sample Java library which can be used to send Multi-Tenant metrics data</description>
+    <description>Sample Java library which can be used to send Multi-Tenant metrics data</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,6 +36,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId>
+            <artifactId>jose4j</artifactId>
+            <version>0.7.2</version>
+        </dependency>
+
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>firehose</artifactId>

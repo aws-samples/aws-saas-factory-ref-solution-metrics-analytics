@@ -1,16 +1,26 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metrics.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 public class Metric {
 
     private String name;
     private String unit;
-    private Long value;
+    private Integer value;
+
+    public Metric() {
+    }
+
+    public Metric(String name, String unit, Integer value) {
+        this.name = name;
+        this.unit = unit;
+        this.value = value;
+    }
 
     @JsonIgnore
     public boolean isValid() {
@@ -36,11 +46,11 @@ public class Metric {
     }
 
     @JsonGetter("value")
-    public Long getValue() {
+    public Integer getValue() {
         return this.value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 
