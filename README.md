@@ -141,7 +141,7 @@ Your goal should be to use a standard way to send metric data, inside your SaaS 
 
 This SDK uses maven. For building the artifacts use the following commands. 
 ```
-cd metrics-java-sdk
+cd metrics-java-lib
 mvn clean install
 ```
 This will install the artifact into your local maven repository.
@@ -150,8 +150,8 @@ Assuming your SaaS Application is written in Java, use the following snippet to 
 ```
 <dependency>
             <groupId>com.amazonaws.saas</groupId>
-            <artifactId>metrics-java-sdk</artifactId>
-            <version>1.0.0</version>
+            <artifactId>metrics-java-lib</artifactId>
+            <version>1.1.0</version>
 </dependency>
 ```
 
@@ -179,7 +179,14 @@ MetricEvent event = new MetricEventBuilder()
 logger.log(event);
 ```
 
-You can refer this SDK to come up with sample implementations in other programming languages, depending upon your use case.
+We have also created a wrapper in version 1.1.0 based on jose4j library. You can use JWTClaimMetricLoggerFactory to get either a simple or batch logger. Once you aquire the logger you can instrument your applications using the following one liner code.
+
+```
+JWTClaimContextMetricLogger metricLogger = JWTClaimMetricLoggerFactory.getLogger();
+metricLogger.log(new ExecutionTimeMetric(700), claims);
+```
+
+In this example you will pass your deserialized JWT claims using JWTClaims class which will extract tenent specific details. You can refer this library to come up with sample implementations in other programming languages, depending upon your use case.
 
 ## Sample Multi-Tenant Dashboard
 Till now we have deployed the architecture, setup QuickSight and sent some sample data to the deployed stack. Now comes the most important part of visualizing the data, using QuickSight. This is what the business and technical owners of your SaaS application will use to see tenant level trends and make some of the important decisions.
