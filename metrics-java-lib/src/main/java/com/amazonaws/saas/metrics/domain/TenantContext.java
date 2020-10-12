@@ -5,16 +5,15 @@ package com.amazonaws.saas.metrics.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.Objects;
 
-public class Tenant {
+public class TenantContext {
 
     private String id;
     private String name;
     private String tier;
 
-    public Tenant() {
+    public TenantContext() {
     }
 
     @JsonIgnore
@@ -57,10 +56,10 @@ public class Tenant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Tenant tenant = (Tenant) o;
-        return Objects.equals(id, tenant.id) &&
-                Objects.equals(name, tenant.name) &&
-                Objects.equals(tier, tenant.tier);
+        TenantContext tenantContext = (TenantContext) o;
+        return Objects.equals(id, tenantContext.id) &&
+                Objects.equals(name, tenantContext.name) &&
+                Objects.equals(tier, tenantContext.tier);
     }
 
     @Override

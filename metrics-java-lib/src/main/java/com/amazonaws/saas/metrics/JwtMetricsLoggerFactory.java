@@ -2,19 +2,24 @@
 // SPDX-License-Identifier: MIT-0
 package com.amazonaws.saas.metrics;
 
-public class JWTClaimMetricLoggerFactory {
+/**
+ * This is a factory class used to create and configure a batch or single logger.
+ */
+public class JwtMetricsLoggerFactory {
 
-    private static JWTClaimContextMetricLogger logger;
-    private static JWTClaimContextMetricLogger batchLogger;
+    private static JwtMetricsLogger logger;
+    private static JwtMetricsLogger batchLogger;
 
     /**
      * This method is used to initialize and get a simple logger, which will send the metric event to
      * kinesis data firehose as soon as it is received. This should be used in environments like lambda.
      * @return JWTClaimContextMetricLogger
      */
-    public synchronized static JWTClaimContextMetricLogger getLogger() {
+    public synchronized static JwtMetricsLogger getLogger(JwtTokenService tokenService) {
         if(logger == null) {
-            logger = new JWTClaimContextMetricLogger(1);
+            logger = new JwtMetricsLogger(1);
+            logger.setTokenService(tokenService);
+
         }
         return logger;
     }
@@ -26,9 +31,10 @@ public class JWTClaimMetricLoggerFactory {
      * in containers or EC2.
      * @return JWTClaimContextMetricLogger
      */
-    public synchronized static JWTClaimContextMetricLogger getBatchLogger() {
+    public synchronized static JwtMetricsLogger getBatchLogger(JwtTokenService tokenService) {
         if(batchLogger == null) {
-            batchLogger = new JWTClaimContextMetricLogger();
+            batchLogger = new JwtMetricsLogger();
+            logger.setTokenService(tokenService);
         }
         return batchLogger;
     }

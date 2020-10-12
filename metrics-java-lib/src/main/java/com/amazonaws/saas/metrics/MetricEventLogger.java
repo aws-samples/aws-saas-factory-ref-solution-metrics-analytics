@@ -5,6 +5,10 @@ package com.amazonaws.saas.metrics;
 import com.amazonaws.saas.metrics.domain.MetricEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.util.CharsetUtil;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
@@ -13,10 +17,12 @@ import software.amazon.awssdk.services.firehose.FirehoseClient;
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+/**
+ * MetricEventLogger is used to log the metric event by sending it to kinsis data firehose.
+ * It can be used in a batch and single mode of communication.
+ * In log running tasks batch mode is preferred, batch size and time window can be configured via
+ * properties files.
+ */
 public class MetricEventLogger {
     private final Logger logger = LoggerFactory.getLogger(MetricEventLogger.class);
 

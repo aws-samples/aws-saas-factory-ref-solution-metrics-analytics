@@ -7,11 +7,11 @@ public class StorageMetric extends Metric {
     public static final String METRIC_NAME = "Storage";
     public static final String DEFAULT_UNIT = "MB";
 
-    public StorageMetric(Integer value) {
+    public StorageMetric(Long value) {
         super(METRIC_NAME, DEFAULT_UNIT, value);
     }
 
-    public StorageMetric(String unit, Integer value) {
+    public StorageMetric(String unit, Long value) {
         super(METRIC_NAME, unit, value);
     }
 }

@@ -5,11 +5,10 @@ package com.amazonaws.saas.metrics.builder;
 import com.amazonaws.saas.metrics.domain.Metric;
 import com.amazonaws.saas.metrics.domain.MetricEvent;
 import com.amazonaws.saas.metrics.domain.MetricEvent.Type;
-import com.amazonaws.saas.metrics.domain.Tenant;
+import java.util.Map;
+import com.amazonaws.saas.metrics.domain.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class MetricEventBuilder {
     private static final Logger logger = LoggerFactory.getLogger(MetricEventBuilder.class);
@@ -34,8 +33,8 @@ public class MetricEventBuilder {
         return this;
     }
 
-    public MetricEventBuilder withTenant(Tenant tenant) {
-        this.metricEvent.setTenant(tenant);
+    public MetricEventBuilder withTenantContext(TenantContext tenantContext) {
+        this.metricEvent.setTenantContext(tenantContext);
         return this;
     }
 

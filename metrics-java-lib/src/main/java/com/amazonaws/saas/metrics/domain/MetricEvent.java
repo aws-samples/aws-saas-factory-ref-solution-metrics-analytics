@@ -20,7 +20,7 @@ public class MetricEvent {
     private MetricEvent.Type type;
     private String workload;
     private String context;
-    private Tenant tenant;
+    private TenantContext tenantContext;
     private Map<String, String> metaData;
     private Metric metric;
     private Long timestamp;
@@ -29,13 +29,13 @@ public class MetricEvent {
         this.type = MetricEvent.Type.Application;
         this.timestamp = Instant.now().getEpochSecond();
         this.metaData = new HashMap<>();
-        this.tenant = new Tenant();
+        this.tenantContext = new TenantContext();
         this.metric = new Metric();
     }
 
     @JsonIgnore
     public boolean isValid() {
-        return !this.getWorkload().isEmpty() && this.tenant.isValid() && this.metric.isValid();
+        return !this.getWorkload().isEmpty() && this.tenantContext.isValid() && this.metric.isValid();
     }
 
     public void setType(MetricEvent.Type type) {
@@ -66,12 +66,12 @@ public class MetricEvent {
     }
 
     @JsonGetter("tenant")
-    public Tenant getTenant() {
-        return this.tenant;
+    public TenantContext getTenantContext() {
+        return this.tenantContext;
     }
 
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public void setTenantContext(TenantContext tenantContext) {
+        this.tenantContext = tenantContext;
     }
 
     @JsonGetter("meta-data")
@@ -107,7 +107,7 @@ public class MetricEvent {
                 "type=" + type +
                 ", workload='" + workload + '\'' +
                 ", context='" + context + '\'' +
-                ", tenant=" + tenant +
+                ", tenant=" + tenantContext +
                 ", metaData=" + metaData +
                 ", metric=" + metric +
                 ", timestamp=" + timestamp +
@@ -119,14 +119,14 @@ public class MetricEvent {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
             MetricEvent that = (MetricEvent)o;
-            return this.type == that.type && Objects.equals(this.workload, that.workload) && Objects.equals(this.context, that.context) && Objects.equals(this.tenant, that.tenant) && Objects.equals(this.metaData, that.metaData) && Objects.equals(this.metric, that.metric) && Objects.equals(this.timestamp, that.timestamp);
+            return this.type == that.type && Objects.equals(this.workload, that.workload) && Objects.equals(this.context, that.context) && Objects.equals(this.tenantContext, that.tenantContext) && Objects.equals(this.metaData, that.metaData) && Objects.equals(this.metric, that.metric) && Objects.equals(this.timestamp, that.timestamp);
         } else {
             return false;
         }
     }
 
     public int hashCode() {
-        return Objects.hash(new Object[]{this.type, this.workload, this.context, this.tenant, this.metaData, this.metric, this.timestamp});
+        return Objects.hash(new Object[]{this.type, this.workload, this.context, this.tenantContext, this.metaData, this.metric, this.timestamp});
     }
 
 }

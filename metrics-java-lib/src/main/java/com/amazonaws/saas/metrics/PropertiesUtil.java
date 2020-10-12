@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+/**
+ * PropertiesUtil is used to load the properties file
+ * It will get the property by name or return the provided default value
+ * if the property is not found.
+ */
 public class PropertiesUtil {
 
     public static final Properties properties = new Properties();

@@ -12,7 +12,7 @@ public class MetricBuilder {
         return this;
     }
 
-    public MetricBuilder withValue(Integer value) {
+    public MetricBuilder withValue(Long value) {
         this.metric.setValue(value);
         return this;
     }

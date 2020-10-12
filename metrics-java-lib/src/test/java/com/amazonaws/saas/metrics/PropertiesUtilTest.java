@@ -32,13 +32,13 @@ public class PropertiesUtilTest {
 
     @Test
     public void testLibraryProperties() throws Exception{
-        assertEquals("tenant-id", propertiesUtil.getPropertyOrDefault("tenant.id.claim.field", "None"));
-        assertEquals("tenant-name", propertiesUtil.getPropertyOrDefault("tenant.name.claim.field", "None"));
-        assertEquals("tenant-tier", propertiesUtil.getPropertyOrDefault("tenant.tier.claim.field", "None"));
+        assertEquals("tenant-id", propertiesUtil.getPropertyOrDefault("tenantContext.id.claim.field", "None"));
+        assertEquals("tenant-name", propertiesUtil.getPropertyOrDefault("tenantContext.name.claim.field", "None"));
+        assertEquals("tenant-tier", propertiesUtil.getPropertyOrDefault("tenantContext.tier.claim.field", "None"));
         assertEquals("user-id", propertiesUtil.getPropertyOrDefault("user.id.claim.field", "None"));
         assertEquals("Metrics", propertiesUtil.getPropertyOrDefault("kinesis.stream.name", "None"));
         assertEquals("us-east-1", propertiesUtil.getPropertyOrDefault("aws.region", "None"));
-        assertEquals("Product Application", propertiesUtil.getPropertyOrDefault("workload", "None"));
+        assertEquals("Application Name", propertiesUtil.getPropertyOrDefault("workload", "None"));
         assertEquals("25", propertiesUtil.getPropertyOrDefault("batch.size", "None"));
         assertEquals("30", propertiesUtil.getPropertyOrDefault("flush.time.window.in.seconds", "None"));
     }

@@ -7,11 +7,11 @@ public class ExecutionTimeMetric extends Metric {
     public static final String METRIC_NAME = "ExecutionTime";
     public static final String DEFAULT_UNIT = "msec";
 
-    public ExecutionTimeMetric(Integer value) {
+    public ExecutionTimeMetric(Long value) {
         super(METRIC_NAME, DEFAULT_UNIT, value);
     }
 
-    public ExecutionTimeMetric(String unit, Integer value) {
+    public ExecutionTimeMetric(String unit, Long value) {
         super(METRIC_NAME, unit, value);
     }
 

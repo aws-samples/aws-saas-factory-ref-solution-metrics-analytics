@@ -11,12 +11,12 @@ public class Metric {
 
     private String name;
     private String unit;
-    private Integer value;
+    private Long value;
 
     public Metric() {
     }
 
-    public Metric(String name, String unit, Integer value) {
+    public Metric(String name, String unit, Long value) {
         this.name = name;
         this.unit = unit;
         this.value = value;
@@ -46,11 +46,11 @@ public class Metric {
     }
 
     @JsonGetter("value")
-    public Integer getValue() {
+    public Long getValue() {
         return this.value;
     }
 
-    public void setValue(Integer value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 

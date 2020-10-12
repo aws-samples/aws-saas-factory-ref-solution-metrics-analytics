@@ -7,7 +7,7 @@ public class CountMetric extends Metric {
     public static final String METRIC_NAME = "Count";
     public static final String DEFAULT_UNIT = "unit";
 
-    public CountMetric(Integer value) {
+    public CountMetric(Long value) {
         super(METRIC_NAME, DEFAULT_UNIT, value);
     }
 
