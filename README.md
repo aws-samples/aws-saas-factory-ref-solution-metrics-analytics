@@ -151,7 +151,7 @@ Assuming your SaaS Application is written in Java, use the following snippet to 
 <dependency>
             <groupId>com.amazonaws.saas</groupId>
             <artifactId>metrics-java-lib</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
 </dependency>
 ```
 
@@ -179,14 +179,14 @@ MetricEvent event = new MetricEventBuilder()
 logger.log(event);
 ```
 
-We have also created a wrapper in version 1.1.0 based on jose4j library. You can use JWTClaimMetricLoggerFactory to get either a simple or batch logger. Once you aquire the logger you can instrument your applications using the following one liner code.
+We have also created a wrapper in version 1.2.0 based on jose4j library. You can use JwtMetricsLogger to get either a simple or batch logger. Once you acquire the logger you can instrument your applications using the following one liner code.
 
 ```
-JWTClaimContextMetricLogger metricLogger = JWTClaimMetricLoggerFactory.getLogger();
-metricLogger.log(new ExecutionTimeMetric(700), claims);
+JwtMetricsLogger metricLogger = JwtMetricsLoggerFactory.getLogger(tokenService);
+metricLogger.log(new ExecutionTimeMetric(700), jwtToken);
 ```
 
-In this example you will pass your deserialized JWT claims using JWTClaims class which will extract tenent specific details. You can refer this library to come up with sample implementations in other programming languages, depending upon your use case.
+In this example you will pass your JWT token string which will be used to extract tenant context. You can refer to this library to come up with sample implementations in other programming languages, depending upon your use case.
 
 ## Sample Multi-Tenant Dashboard
 Till now we have deployed the architecture, setup QuickSight and sent some sample data to the deployed stack. Now comes the most important part of visualizing the data, using QuickSight. This is what the business and technical owners of your SaaS application will use to see tenant level trends and make some of the important decisions.
