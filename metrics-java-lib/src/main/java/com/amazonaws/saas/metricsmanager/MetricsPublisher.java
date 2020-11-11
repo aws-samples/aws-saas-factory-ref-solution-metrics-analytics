@@ -1,35 +1,36 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metricsmanager;
 
-import com.amazonaws.saas.metrics.builder.MetricEventBuilder;
-import com.amazonaws.saas.metrics.domain.Metric;
-import com.amazonaws.saas.metrics.domain.MetricEvent;
-import com.amazonaws.saas.metrics.domain.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * This is a sample wrapper for MetricEventLogger and uses JWT tokens to extract tenant context.
- * Its implementation is based on jose4j library.
- */
-public class JwtMetricsLogger {
-    private static final Logger logger = LoggerFactory.getLogger(JwtMetricsLogger.class);
+import com.amazonaws.saas.metricsmanager.builder.MetricEventBuilder;
+import com.amazonaws.saas.metricsmanager.entities.Metric;
+import com.amazonaws.saas.metricsmanager.entities.MetricEvent;
+import com.amazonaws.saas.metricsmanager.entities.Tenant;
+import com.amazonaws.saas.tokenmanager.TokenInterface;
 
-    private JwtTokenService tokenService;
-    private MetricEventLogger metricEventLogger;
+/**
+ * This is a sample wrapper for FirehosePublishService and uses JWT tokens to extract tenant context. 
+ */
+public class MetricsPublisher {
+    private static final Logger logger = LoggerFactory.getLogger(MetricsPublisher.class);
+
+    private TokenInterface tokenService;
+    private FirehosePublishService firehosePublisher;
     private static PropertiesUtil propUtil = new PropertiesUtil();
 
-    public JwtMetricsLogger() {
+    public MetricsPublisher() {
         int batchSize = Integer.parseInt(propUtil.getPropertyOrDefault("batch.size", "25"));
-        initializeMetricEventLogger(batchSize);
+        initializeFirehosePublishService(batchSize);
     }
 
-    public JwtMetricsLogger(int batchSize) {
-        initializeMetricEventLogger(batchSize);
+    public MetricsPublisher(int batchSize) {
+        initializeFirehosePublishService(batchSize);
     }
 
     /**
@@ -38,10 +39,10 @@ public class JwtMetricsLogger {
      * @param metric
      * @param jwtToken
      */
-    public void log(Metric metric, String jwtToken) {
-        MetricEvent event = getMetricEvent(metric, jwtToken, new HashMap<>());
+    public void publishMetricEvent(Metric metric, String jwtToken) {
+        MetricEvent event = buildMetricEvent(metric, jwtToken, new HashMap<>());
         logger.debug(String.format("Logging Metric Event: %s", metric));
-        metricEventLogger.logEvent(event);
+        firehosePublisher.publishEvent(event);
     }
 
 
@@ -54,18 +55,18 @@ public class JwtMetricsLogger {
      * @param jwtToken
      * @param metaData
      */
-    public void log(Metric metric, String jwtToken, Map<String, String> metaData) {
-        MetricEvent event = getMetricEvent(metric, jwtToken, metaData);
+    public void publishMetricEvent(Metric metric, String jwtToken, Map<String, String> metaData) {
+        MetricEvent event = buildMetricEvent(metric, jwtToken, metaData);
         logger.debug(String.format("Logging Metric Event: %s", metric));
-        metricEventLogger.logEvent(event);
+        firehosePublisher.publishEvent(event);
     }
 
-    public void setTokenService(JwtTokenService tokenService) {
+    public void setTokenService(TokenInterface tokenService) {
         this.tokenService = tokenService;
     }
 
-    protected MetricEvent getMetricEvent(Metric metric, String jwtToken, Map<String, String> metaData) {
-        TenantContext tenantContext = tokenService.extractTenantContextFrom(jwtToken);
+    protected MetricEvent buildMetricEvent(Metric metric, String jwtToken, Map<String, String> metaData) {
+        Tenant Tenant = tokenService.extractTenantFrom(jwtToken);
 
         String workload = propUtil.getPropertyOrDefault("workload", "No Workload Info In ENV Variable.");
 
@@ -73,17 +74,17 @@ public class JwtMetricsLogger {
                 .withType(MetricEvent.Type.Application)
                 .withWorkload(workload)
                 .withMetric(metric)
-                .withTenantContext(tenantContext)
+                .withTenant(Tenant)
                 .withMetaData(metaData)
                 .build();
     }
 
-    private void initializeMetricEventLogger(int batchSize) {
-        logger.debug("Initializing Metric Event Logger");
+    private void initializeFirehosePublishService(int batchSize) {
+        logger.debug("Initializing the service to publish to firehose");
         int flushTimeWindow = Integer.parseInt(propUtil.getPropertyOrDefault("flush.time.window.in.seconds", "5"));
         String kinesisStreamName = propUtil.getPropertyOrDefault("kinesis.stream.name", "Metrics");
         Region region = Region.of(propUtil.getPropertyOrDefault("aws.region", "us-east-1"));
-        metricEventLogger = new MetricEventLogger(kinesisStreamName, region, batchSize, flushTimeWindow);
+        firehosePublisher = new FirehosePublishService(kinesisStreamName, region, batchSize, flushTimeWindow);
     }
 
 

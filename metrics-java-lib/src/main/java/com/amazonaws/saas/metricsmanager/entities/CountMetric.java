@@ -1,6 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics.domain;
+package com.amazonaws.saas.metricsmanager.entities;
 
 public class CountMetric extends Metric {
 

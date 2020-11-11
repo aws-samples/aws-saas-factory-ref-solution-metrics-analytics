@@ -1,6 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics.domain;
+package com.amazonaws.saas.metricsmanager.entities;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,7 +20,7 @@ public class MetricEvent {
     private MetricEvent.Type type;
     private String workload;
     private String context;
-    private TenantContext tenantContext;
+    private Tenant Tenant;
     private Map<String, String> metaData;
     private Metric metric;
     private Long timestamp;
@@ -29,13 +29,13 @@ public class MetricEvent {
         this.type = MetricEvent.Type.Application;
         this.timestamp = Instant.now().getEpochSecond();
         this.metaData = new HashMap<>();
-        this.tenantContext = new TenantContext();
+        this.Tenant = new Tenant();
         this.metric = new Metric();
     }
 
     @JsonIgnore
     public boolean isValid() {
-        return !this.getWorkload().isEmpty() && this.tenantContext.isValid() && this.metric.isValid();
+        return !this.getWorkload().isEmpty() && this.Tenant.isValid() && this.metric.isValid();
     }
 
     public void setType(MetricEvent.Type type) {
@@ -66,12 +66,12 @@ public class MetricEvent {
     }
 
     @JsonGetter("tenant")
-    public TenantContext getTenantContext() {
-        return this.tenantContext;
+    public Tenant getTenant() {
+        return this.Tenant;
     }
 
-    public void setTenantContext(TenantContext tenantContext) {
-        this.tenantContext = tenantContext;
+    public void setTenant(Tenant Tenant) {
+        this.Tenant = Tenant;
     }
 
     @JsonGetter("meta-data")
@@ -107,7 +107,7 @@ public class MetricEvent {
                 "type=" + type +
                 ", workload='" + workload + '\'' +
                 ", context='" + context + '\'' +
-                ", tenant=" + tenantContext +
+                ", tenant=" + Tenant +
                 ", metaData=" + metaData +
                 ", metric=" + metric +
                 ", timestamp=" + timestamp +
@@ -119,14 +119,14 @@ public class MetricEvent {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
             MetricEvent that = (MetricEvent)o;
-            return this.type == that.type && Objects.equals(this.workload, that.workload) && Objects.equals(this.context, that.context) && Objects.equals(this.tenantContext, that.tenantContext) && Objects.equals(this.metaData, that.metaData) && Objects.equals(this.metric, that.metric) && Objects.equals(this.timestamp, that.timestamp);
+            return this.type == that.type && Objects.equals(this.workload, that.workload) && Objects.equals(this.context, that.context) && Objects.equals(this.Tenant, that.Tenant) && Objects.equals(this.metaData, that.metaData) && Objects.equals(this.metric, that.metric) && Objects.equals(this.timestamp, that.timestamp);
         } else {
             return false;
         }
     }
 
     public int hashCode() {
-        return Objects.hash(new Object[]{this.type, this.workload, this.context, this.tenantContext, this.metaData, this.metric, this.timestamp});
+        return Objects.hash(new Object[]{this.type, this.workload, this.context, this.Tenant, this.metaData, this.metric, this.timestamp});
     }
 
 }

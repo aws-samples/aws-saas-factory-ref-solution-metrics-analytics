@@ -1,4 +1,4 @@
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metricsmanager;
 
 import org.junit.Test;
 
@@ -20,8 +20,8 @@ public class PropertiesUtilTest {
 
     @Test()
     public void loadPropertyFromFile() {
-        String propertyValue = propertiesUtil.getPropertyOrDefault("kinesis.stream.name", "DefaultStreamName");
-        assertEquals("Metrics", propertyValue);
+        String propertyValue = propertiesUtil.getPropertyOrDefault("aws.region", "DefaultRegion");
+        assertEquals("us-east-1", propertyValue);
     }
 
     @Test()
@@ -32,16 +32,13 @@ public class PropertiesUtilTest {
 
     @Test
     public void testLibraryProperties() throws Exception{
-        assertEquals("tenant-id", propertiesUtil.getPropertyOrDefault("tenantContext.id.claim.field", "None"));
-        assertEquals("tenant-name", propertiesUtil.getPropertyOrDefault("tenantContext.name.claim.field", "None"));
-        assertEquals("tenant-tier", propertiesUtil.getPropertyOrDefault("tenantContext.tier.claim.field", "None"));
+        assertEquals("tenant-id", propertiesUtil.getPropertyOrDefault("Tenant.id.claim.field", "None"));
+        assertEquals("tenant-name", propertiesUtil.getPropertyOrDefault("Tenant.name.claim.field", "None"));
+        assertEquals("tenant-tier", propertiesUtil.getPropertyOrDefault("Tenant.tier.claim.field", "None"));
         assertEquals("user-id", propertiesUtil.getPropertyOrDefault("user.id.claim.field", "None"));
-        assertEquals("Metrics", propertiesUtil.getPropertyOrDefault("kinesis.stream.name", "None"));
         assertEquals("us-east-1", propertiesUtil.getPropertyOrDefault("aws.region", "None"));
         assertEquals("Application Name", propertiesUtil.getPropertyOrDefault("workload", "None"));
         assertEquals("25", propertiesUtil.getPropertyOrDefault("batch.size", "None"));
         assertEquals("30", propertiesUtil.getPropertyOrDefault("flush.time.window.in.seconds", "None"));
     }
-
-
 }

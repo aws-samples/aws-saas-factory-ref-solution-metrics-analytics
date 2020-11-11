@@ -1,47 +1,51 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.tokenmanager;
 
-import com.amazonaws.saas.metrics.builder.TenantContextBuilder;
-import com.amazonaws.saas.metrics.domain.TenantContext;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwk.RsaJwkGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class JwtTokenJose4jServiceImplTest {
+import com.amazonaws.saas.metricsmanager.builder.TenantBuilder;
+import com.amazonaws.saas.metricsmanager.entities.Tenant;
 
-    private JwtTokenJose4jServiceImpl jwtTokenManager;
+public class JwtTokenServiceTest {
+
+    private JwtTokenManager jwtTokenManager;
     private RsaJsonWebKey rsaJsonWebKey;
 
     @Before
     public void setup() throws Exception {
-        jwtTokenManager = new JwtTokenJose4jServiceImpl();
-        rsaJsonWebKey = new RsaKeyFactory().getRsaKey();
+        jwtTokenManager = new JwtTokenManager();
+
+        rsaJsonWebKey = RsaJwkGenerator.generateJwk(2048);
+        rsaJsonWebKey.setKeyId("k1");
         jwtTokenManager.setRsaJsonWebKey(rsaJsonWebKey);
     }
 
     @Test
     public void testIssueAndVerificationOfJwtToken() throws Exception {
-        TenantContext expectedTenantContext = new TenantContextBuilder().withId("123").withName("XYZ").withTier("Free").build();
-        String jwtToken = issueTokenFor(expectedTenantContext);
+        Tenant expectedTenant = new TenantBuilder().withId("123").withName("XYZ").withTier("Free").build();
+        String jwtToken = issueTokenFor(expectedTenant);
         assertNotNull(jwtToken);
 
-        TenantContext tenantContext = jwtTokenManager.extractTenantContextFrom(jwtToken);
+        Tenant Tenant = jwtTokenManager.extractTenantFrom(jwtToken);
 
-        assertEquals(expectedTenantContext, tenantContext);
+        assertEquals(expectedTenant, Tenant);
     }
 
-    String issueTokenFor(TenantContext tenantContext) throws Exception {
-        JwtClaims claims = createJwtClaimsFor(tenantContext);
+    String issueTokenFor(Tenant Tenant) throws Exception {
+        JwtClaims claims = createJwtClaimsFor(Tenant);
 
         return createSignedJwtTokenFor(claims);
     }
 
-    private JwtClaims createJwtClaimsFor(TenantContext tenantContext) {
+    private JwtClaims createJwtClaimsFor(Tenant Tenant) {
         JwtClaims claims =  new JwtClaims();
         claims.setIssuer("Issuer");
         claims.setAudience("Audience");
@@ -50,9 +54,9 @@ public class JwtTokenJose4jServiceImplTest {
         claims.setIssuedAtToNow();
         claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject("subject");
-        claims.setClaim("tenant-id", tenantContext.getId());
-        claims.setClaim("tenant-name", tenantContext.getName());
-        claims.setClaim("tenant-tier", tenantContext.getTier());
+        claims.setClaim("tenant-id", Tenant.getId());
+        claims.setClaim("tenant-name", Tenant.getName());
+        claims.setClaim("tenant-tier", Tenant.getTier());
         return claims;
     }
 

@@ -136,57 +136,30 @@ This will now push the metrics records to Kinesis Firehose, which will then inge
 
 You can now start exploring the metric data inside Redshift, using the Query Editor.
 
-## Example Java SDK to send metrics from your SaaS Application
-Your goal should be to use a standard way to send metric data, inside your SaaS Application. To demonstrate this, this code repository comes with a sample Java SDK to ingest data into Kinesis Firehose. You can refer to this Java SDK, as a reference implementation, to understand how your SaaS application can potentially send metrics data to the deployed architecture.
+## Example Java Client Implementation to send metrics from your SaaS Application
+Your goal should be to use a standard way to send metric data, inside your SaaS Application. To demonstrate this, this code repository comes with a sample Java client implementation to ingest data into Kinesis Firehose. You can refer to this Java Client, as a reference implementation, to understand how your SaaS application can potentially send metrics data to the deployed architecture.
 
-This SDK uses maven. For building the artifacts use the following commands. 
+This library uses maven. For building the artifacts use the following commands. 
 ```
 cd metrics-java-lib
-mvn clean install
-```
-This will install the artifact into your local maven repository.
-
-Assuming your SaaS Application is written in Java, use the following snippet to import the artifact as a dependency.
-```
-<dependency>
-            <groupId>com.amazonaws.saas</groupId>
-            <artifactId>metrics-java-lib</artifactId>
-            <version>1.2.0</version>
-</dependency>
+mvn clean package
 ```
 
-Sample Java code to send the metric:
+<b>"sampleclient.java"</b> inside "metrics-java-lib\src\main\java\com\amazonaws\saas" folder provides an example of sending metrics to the Kinesis Firehose stream created by the CloudFormation. 
+
+The basic assumption here is that your application has authenticated against an identity provider and in return has got a JWT token. This JWT token now has tenant context in the payload. The sample client uses a "MetricsPublisherFactory" inside the "metricsmanger" folder to get a reference of the MetricsPublisher class. You can either use "getPublisher" or "getBatchPublisher" method to do that. The only difference between two methods is that the getBatchPublisher buffers the metrics in memory, till the batchSize is achieved, before pushing to Firehose. On the other hand getPublisher will push data to Firehose immediately. 
+
+The next step is now just to push the metric event using "publishMetricEvent" method. This method takes the actual Metric, JWT token (in order to extract tenant context) and a HashMap (one or more key value pairs). The HashMap can be used to send any additional information that doesn't belong to either Metric or Tenant. This could be things like user information, as an example. "publisMetricEvent" extracts the tenant information from the JWT token and publishes to Firehose along with actual metric and metadata (key value pair).
+
+Here is the sample code from "sampleclient.java" that does it
 ```
-MetricEventLogger logger = MetricEventLogger.getLoggerFor("STREAM_NAME", Region.US_EAST_1);
-MetricEvent event = new MetricEventBuilder()
-        .withType(MetricEvent.Type.Application)
-        .withWorkload("AuthApp")
-        .withContext("Login")
-        .withMetric(new MetricBuilder()
-                .withName("ExecutionTime")
-                .withUnit("msec")
-                .withValue(1000L)
-                .build()
-        )
-        .withTenant(new TenantBuilder()
-                .withId("123")
-                .withName("ABC")
-                .withTier("Free")
-                .build())
-        .addMetaData("user", "111")
-        .addMetaData("resource", "s3")
-        .build();
-logger.log(event);
+metricPublisher.publishMetricEvent(new ExecutionTimeMetric(100L), jwtToken, new HashMap<>());
 ```
 
-We have also created a wrapper in version 1.2.0 based on jose4j library. You can use JwtMetricsLogger to get either a simple or batch logger. Once you acquire the logger you can instrument your applications using the following one liner code.
-
+You can use the below command to run the sample client and send data to the your metrics infrastructure you deployed earlier. Make sure to change the "kinesis.stream.name" property inside "metrics-java-lib\src\main\resources" folder to the actual Kinesis Firehose stream name that was deployed as part of the CloudFormation.
 ```
-JwtMetricsLogger metricLogger = JwtMetricsLoggerFactory.getLogger(tokenService);
-metricLogger.log(new ExecutionTimeMetric(700), jwtToken);
+java -jar target/metrics-java-lib-1.2.0-jar-with-dependencies.jar 
 ```
-
-In this example you will pass your JWT token string which will be used to extract tenant context. You can refer to this library to come up with sample implementations in other programming languages, depending upon your use case.
 
 ## Sample Multi-Tenant Dashboard
 Till now we have deployed the architecture, setup QuickSight and sent some sample data to the deployed stack. Now comes the most important part of visualizing the data, using QuickSight. This is what the business and technical owners of your SaaS application will use to see tenant level trends and make some of the important decisions.

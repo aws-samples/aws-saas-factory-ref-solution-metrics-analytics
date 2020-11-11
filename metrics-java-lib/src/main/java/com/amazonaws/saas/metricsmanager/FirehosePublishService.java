@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metricsmanager;
 
-import com.amazonaws.saas.metrics.domain.MetricEvent;
+import com.amazonaws.saas.metricsmanager.entities.MetricEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.util.CharsetUtil;
 import java.util.ArrayList;
@@ -18,13 +18,13 @@ import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
 
 /**
- * MetricEventLogger is used to log the metric event by sending it to kinsis data firehose.
+ * FirehosePublishService is used to log the metric event by sending it to kinsis data firehose.
  * It can be used in a batch and single mode of communication.
  * In log running tasks batch mode is preferred, batch size and time window can be configured via
  * properties files.
  */
-public class MetricEventLogger {
-    private final Logger logger = LoggerFactory.getLogger(MetricEventLogger.class);
+public class FirehosePublishService {
+    private final Logger logger = LoggerFactory.getLogger(FirehosePublishService.class);
 
     public static final int DEFAULT_FLUSH_TIME_IN_SECS = 30;
     private final FirehoseClient firehose;
@@ -34,7 +34,7 @@ public class MetricEventLogger {
     private Long startTime;
     private int flushTimeWindowInSeconds;
 
-    protected MetricEventLogger(String kinesisStreamName, Region region, int batchSize, int flushTimeWindow) {
+    protected FirehosePublishService(String kinesisStreamName, Region region, int batchSize, int flushTimeWindow) {
         this.bufferSize = batchSize;
         this.streamName = kinesisStreamName;
         this.flushTimeWindowInSeconds = flushTimeWindow;
@@ -42,15 +42,7 @@ public class MetricEventLogger {
         this.firehose = getFirehoseClientIn(region);
     }
 
-    public static MetricEventLogger getBatchLoggerFor(String kinesisStreamName, Region region, int batchSize, int flushTimeWindowInSeconds) {
-        return new MetricEventLogger(kinesisStreamName, region, batchSize, flushTimeWindowInSeconds);
-    }
-
-    public static MetricEventLogger getLoggerFor(String kinesisStreamName, Region region) {
-        return new MetricEventLogger(kinesisStreamName, region, 1, DEFAULT_FLUSH_TIME_IN_SECS);
-    }
-
-    public void logEvent(MetricEvent event) {
+    public void publishEvent(MetricEvent event) {
         String eventJsonString = "";
 
         try {
@@ -97,6 +89,7 @@ public class MetricEventLogger {
     }
 
     protected void writeToKinesisFirehose() {
+        logger.debug(streamName);
         firehose.putRecordBatch(PutRecordBatchRequest.builder().deliveryStreamName(streamName).records(recordBuffer).build());
         initializeBuffer();
     }

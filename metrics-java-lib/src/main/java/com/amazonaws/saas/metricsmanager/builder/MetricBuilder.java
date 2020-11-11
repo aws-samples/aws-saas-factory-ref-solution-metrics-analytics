@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics.builder;
+package com.amazonaws.saas.metricsmanager.builder;
 
-import com.amazonaws.saas.metrics.domain.Metric;
+import com.amazonaws.saas.metricsmanager.entities.Metric;
 
 public class MetricBuilder {
     private Metric metric = new Metric();

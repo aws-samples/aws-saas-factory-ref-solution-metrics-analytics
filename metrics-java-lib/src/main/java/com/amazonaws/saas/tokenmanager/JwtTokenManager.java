@@ -1,9 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.tokenmanager;
 
-import com.amazonaws.saas.metrics.builder.TenantContextBuilder;
-import com.amazonaws.saas.metrics.domain.TenantContext;
+import com.amazonaws.saas.metricsmanager.builder.TenantBuilder;
+import com.amazonaws.saas.metricsmanager.entities.Tenant;
+import com.amazonaws.saas.metricsmanager.PropertiesUtil;
+import com.amazonaws.saas.tokenmanager.TokenInterface;
+
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -16,9 +19,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a sample implementation of JwtTokenManager based on jose4j library
  */
-public class JwtTokenJose4jServiceImpl implements JwtTokenService {
+public class JwtTokenManager implements TokenInterface{
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenJose4jServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenManager.class);
     private static PropertiesUtil propUtil = new PropertiesUtil();
     public static final String TENANT_ID_DEFAULT_CLAIM_NAME = "tenant-id";
     public static final String TENANT_NAME_DEFAULT_CLAIM_NAME = "tenant-name";
@@ -27,7 +30,7 @@ public class JwtTokenJose4jServiceImpl implements JwtTokenService {
     private String audience;
     private RsaJsonWebKey rsaJsonWebKey;
 
-    public JwtTokenJose4jServiceImpl() {
+    public JwtTokenManager() {
         issuer = propUtil.getPropertyOrDefault("issuer", "Issuer");
         audience = propUtil.getPropertyOrDefault("audience", "Audience");
     }
@@ -36,22 +39,22 @@ public class JwtTokenJose4jServiceImpl implements JwtTokenService {
      * The implementation of this method relies on jose4j library and the jwtTokens signed by Rsa algorithm.
      * It returns tenant context extracted from the jwtToken.
      * @param jwtToken
-     * @return TenantContext
+     * @return Tenant
      */
     @Override
-    public TenantContext extractTenantContextFrom(String jwtToken) {
+    public Tenant extractTenantFrom(String jwtToken) {
         JwtClaims jwtClaim = extractJwtClaim(jwtToken);
         if (jwtClaim != null) {
             String tenantId = extractTenantIdFrom(jwtClaim);
             String tenantName = extractTenantNameFrom(jwtClaim);
             String tenantTier = extractTenantTierFrom(jwtClaim);
-            return new TenantContextBuilder()
+            return new TenantBuilder()
                     .withId(tenantId)
                     .withName(tenantName)
                     .withTier(tenantTier)
                     .build();
         } else {
-            return new TenantContextBuilder().empty();
+            return new TenantBuilder().empty();
         }
     }
 

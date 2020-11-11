@@ -1,6 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics;
+package com.amazonaws.saas.metricsmanager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.util.Properties;
 public class PropertiesUtil {
 
     public static final Properties properties = new Properties();
-    private static final Logger logger = LoggerFactory.getLogger(MetricEventLogger.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     public PropertiesUtil() {
         this("lib-config.properties");

@@ -1,19 +1,19 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-package com.amazonaws.saas.metrics.domain;
+package com.amazonaws.saas.metricsmanager.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 
-public class TenantContext {
+public class Tenant {
 
     private String id;
     private String name;
     private String tier;
 
-    public TenantContext() {
+    public Tenant() {
     }
 
     @JsonIgnore
@@ -56,10 +56,10 @@ public class TenantContext {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TenantContext tenantContext = (TenantContext) o;
-        return Objects.equals(id, tenantContext.id) &&
-                Objects.equals(name, tenantContext.name) &&
-                Objects.equals(tier, tenantContext.tier);
+        Tenant Tenant = (Tenant) o;
+        return Objects.equals(id, Tenant.id) &&
+                Objects.equals(name, Tenant.name) &&
+                Objects.equals(tier, Tenant.tier);
     }
 
     @Override
