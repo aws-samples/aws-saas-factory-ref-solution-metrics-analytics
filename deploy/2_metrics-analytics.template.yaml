@@ -346,7 +346,18 @@ Resources:
       - Ref: RSDefaultSG
       ClusterSubnetGroupName:
         Ref: RedshiftClusterSubnetGroup
+      # NOTE: The cluster is internet-facing (public subnets + public endpoint) so that
+      # Kinesis Firehose and QuickSight can reach it. The RSDefaultSG security group is the
+      # compensating control: it restricts ingress to the published Firehose and QuickSight
+      # CIDR ranges only. Do NOT widen that security group to 0.0.0.0/0. For a private
+      # deployment, set PubliclyAccessible to false and move the cluster to private subnets
+      # with NAT/VPC connectivity for Firehose and QuickSight.
       PubliclyAccessible: true
+      Encrypted: true
+      KmsKeyId: !If
+        - EncryptData
+        - !GetAtt 'EncryptionKey.Arn'
+        - !Ref 'AWS::NoValue'
       Port:
         Ref: RedshiftPortNumber
   RedshiftClusterParameterGroup:
